@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <title>UGC Collab Finder: sign-in</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main>
+  <h1>UGC Collab Finder</h1>
+
+  <div id="ok" class="card" hidden>
+    <p><b>Threads sign-in is complete.</b> Copy the code below and send it to Alex. It works once and expires in
+      one hour.</p>
+    <p lang="ru" class="muted">Вход через Threads выполнен. Скопируйте код и отправьте Алексу. Код одноразовый и
+      действует один час.</p>
+    <textarea id="code" readonly aria-label="Authorization code"></textarea>
+    <button id="copy" type="button">Copy code</button>
+  </div>
+
+  <div id="err" class="card" hidden>
+    <p><b>Sign-in did not complete.</b></p>
+    <p id="err-text" class="muted"></p>
+  </div>
+
+  <div id="none" class="card" hidden>
+    <p>This page receives the Threads sign-in code. There is nothing to show here.</p>
+  </div>
+</main>
+<script>
+  // The code stays in this browser tab: nothing is sent anywhere. It is useless without the app secret.
+  const params = new URLSearchParams(location.search);
+  const code = params.get('code');
+  const error = params.get('error_description') || params.get('error_reason') || params.get('error');
+  if (code) {
+    document.getElementById('code').value = code;
+    document.getElementById('ok').hidden = false;
+  } else if (error) {
+    document.getElementById('err-text').textContent = error;
+    document.getElementById('err').hidden = false;
+  } else {
+    document.getElementById('none').hidden = false;
+  }
+  // Keep the code out of the address bar and browser history once it is on screen.
+  if (location.search) history.replaceState(null, '', location.pathname);
+  document.getElementById('copy').addEventListener('click', async () => {
+    const box = document.getElementById('code');
+    const btn = document.getElementById('copy');
+    try {
+      await navigator.clipboard.writeText(box.value);
+    } catch (e) {
+      box.select();
+      document.execCommand('copy');
+    }
+    btn.textContent = 'Copied';
+  });
+</script>
+</body>
+</html>
